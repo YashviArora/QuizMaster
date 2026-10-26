@@ -1,0 +1,284 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="QuizMaster Neo - Interactive 10-Question Web Tech Assessment Platform">
+  <title>QuizMaster Neo | 10-Question Tech Challenge</title>
+  <link rel="stylesheet" href="style.css">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800;900&family=JetBrains+Mono:wght@600;700&display=swap" rel="stylesheet">
+</head>
+<body>
+  <!-- Canvas Confetti Effect for High Scores -->
+  <canvas id="confettiCanvas" class="confetti-canvas"></canvas>
+
+  <!-- Dynamic Toast Container -->
+  <div id="toastContainer" class="toast-container" aria-live="polite"></div>
+
+  <!-- Background Animated Mesh Glows -->
+  <div class="mesh-glow mesh-1"></div>
+  <div class="mesh-glow mesh-2"></div>
+  <div class="mesh-glow mesh-3"></div>
+
+  <!-- Navbar -->
+  <header class="navbar">
+    <div class="brand">
+      <div class="logo">Q</div>
+      <div>
+        <h1>QuizMaster <span class="logo-accent">Neo</span></h1>
+        <p>Interactive 10-Question Assessment Suite</p>
+      </div>
+    </div>
+
+    <nav class="nav-actions">
+      <button id="soundToggleBtn" class="icon-chip-btn" type="button" title="Toggle Sound FX">🔊</button>
+      <button id="openModalBtn" class="create-chip-btn" type="button">
+        <span>✨ Add Question</span>
+      </button>
+      <button id="themeBtn" class="icon-chip-btn" type="button" aria-label="Toggle Theme">🌙</button>
+    </nav>
+  </header>
+
+  <main class="container">
+    <!-- Screen 1: Start & Configuration Screen -->
+    <section id="startScreen" class="screen card active-screen">
+      <div class="pill-highlight">⚡ FULL 10-QUESTION ROUND GUARANTEED</div>
+      <div class="quiz-hero-icon">🚀</div>
+      <h2 class="hero-title">Test Your Web & Tech Powers</h2>
+      <p class="subtitle">Complete a fast-paced 10-question evaluation round. Filter your focus topic or play a random mix with live audio feedback!</p>
+
+      <!-- Category & Difficulty Filters -->
+      <div class="controls-panel">
+        <div class="filter-box">
+          <label for="categoryFilter">Select Track:</label>
+          <div class="select-wrapper">
+            <select id="categoryFilter">
+              <option value="All">🌈 All Tracks (Comprehensive 10Q Mix)</option>
+              <option value="HTML & CSS">🎨 HTML & CSS Styling</option>
+              <option value="JavaScript ES6+">⚡ JavaScript ES6+ & Core</option>
+              <option value="React & State">⚛️ React, Hooks & State</option>
+              <option value="Web APIs & Async">🌐 Async JS & REST APIs</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="filter-box">
+          <label for="difficultyFilter">Challenge Mode:</label>
+          <div class="select-wrapper">
+            <select id="difficultyFilter">
+              <option value="All">⚡ Adaptive Dynamic Mix</option>
+              <option value="Easy">🌱 Beginner Essentials</option>
+              <option value="Medium">🔥 Intermediate Standard</option>
+              <option value="Hard">💀 Advanced Hardcore</option>
+            </select>
+          </div>
+        </div>
+      </div>
+
+      <!-- Feature Grid Cards -->
+      <div class="features-grid">
+        <div class="feature-card neon-blue">
+          <span class="feat-icon">🎯</span>
+          <div>
+            <strong>Exact 10 Questions</strong>
+            <small>Clean scoring metrics</small>
+          </div>
+        </div>
+        <div class="feature-card neon-purple">
+          <span class="feat-icon">⏱️</span>
+          <div>
+            <strong>15s per Question</strong>
+            <small>Live circular timer ring</small>
+          </div>
+        </div>
+        <div class="feature-card neon-pink">
+          <span class="feat-icon">🔊</span>
+          <div>
+            <strong>Audio & Haptics</strong>
+            <small>Synthesized sound effects</small>
+          </div>
+        </div>
+        <div class="feature-card neon-green">
+          <span class="feat-icon">📊</span>
+          <div>
+            <strong>Detailed Review</strong>
+            <small>Question breakdown at end</small>
+          </div>
+        </div>
+      </div>
+
+      <div class="action-row">
+        <button id="startBtn" class="primary-btn glow-btn" type="button">Start 10-Question Round →</button>
+        <button id="fetchApiBtn" class="api-btn" type="button">
+          <span class="btn-spinner hidden" id="apiSpinner"></span>
+          <span>⚡ Import Live Web Dev Trivia</span>
+        </button>
+      </div>
+    </section>
+
+    <!-- Screen 2: Active Quiz Screen -->
+    <section id="quizScreen" class="screen card hidden">
+      <div class="quiz-top">
+        <div class="badge-cluster">
+          <span id="questionCategoryBadge" class="cat-pill">Track</span>
+          <span id="difficultyBadge" class="diff-pill">Medium</span>
+          <span id="questionNumber" class="status-indicator">Question 1 of 10</span>
+        </div>
+
+        <!-- Circular Animated Timer -->
+        <div class="timer-container">
+          <svg class="timer-svg" viewBox="0 0 44 44">
+            <circle class="timer-bg-circle" cx="22" cy="22" r="18"></circle>
+            <circle id="timerRing" class="timer-fg-circle" cx="22" cy="22" r="18"></circle>
+          </svg>
+          <span id="timerText" class="timer-number">15</span>
+        </div>
+      </div>
+
+      <!-- Progress Track -->
+      <div class="progress-track" aria-label="Quiz progress">
+        <div id="progressBar" class="progress-bar"></div>
+      </div>
+
+      <div class="question-area">
+        <h2 id="questionText">Loading question prompt...</h2>
+        <div id="options" class="options"></div>
+      </div>
+
+      <div class="quiz-footer-actions">
+        <button id="quitBtn" class="ghost-danger-btn" type="button">✕ Quit Round</button>
+        <button id="nextBtn" class="primary-btn next-btn" type="button" disabled>
+          Next Question →
+        </button>
+      </div>
+    </section>
+
+    <!-- Screen 3: Result Dashboard with Comprehensive Review -->
+    <section id="resultScreen" class="screen card hidden">
+      <div class="result-icon-banner" id="resultIcon">🎉</div>
+      <p class="eyebrow">SESSION METRICS & REPORT</p>
+      <h2 id="resultHeading">Performance Assessment</h2>
+
+      <div class="score-circle-container">
+        <div class="score-circle">
+          <strong id="score">0/10</strong>
+          <span id="percentage">0%</span>
+        </div>
+      </div>
+
+      <p id="resultMessage" class="result-message"></p>
+
+      <!-- 4 Vibrant Stat Cards -->
+      <div class="result-stats">
+        <div class="stat-card stat-correct">
+          <span>Correct Answers</span>
+          <strong id="correctCount">0</strong>
+        </div>
+        <div class="stat-card stat-wrong">
+          <span>Wrong / Timeouts</span>
+          <strong id="wrongCount">0</strong>
+        </div>
+        <div class="stat-card stat-accuracy">
+          <span>Final Accuracy</span>
+          <strong id="accuracyRate">0%</strong>
+        </div>
+        <div class="stat-card stat-best">
+          <span>Personal Best</span>
+          <strong id="bestScore">0/10</strong>
+        </div>
+      </div>
+
+      <!-- Interactive Question-by-Question Review Breakdown -->
+      <div class="review-section">
+        <div class="review-header">
+          <h3>Question Review Breakdown (10 Questions)</h3>
+          <span class="review-hint">Green = Correct • Red = Incorrect</span>
+        </div>
+        <div id="reviewContainer" class="review-grid"></div>
+      </div>
+
+      <!-- Recent Attempt History -->
+      <div class="history-accordion">
+        <h3>Recent Evaluation Logs</h3>
+        <ul id="historyList" class="history-list">
+          <li class="empty-state">No recorded attempts yet.</li>
+        </ul>
+      </div>
+
+      <div class="result-actions">
+        <button id="restartBtn" class="primary-btn glow-btn" type="button">↻ Play New 10-Question Round</button>
+        <button id="homeBtn" class="secondary-btn" type="button">Dashboard Home</button>
+        <button id="clearDataBtn" class="ghost-danger-btn" type="button">Clear Saved Logs</button>
+      </div>
+    </section>
+  </main>
+
+  <!-- Interactive Modal: Add Custom Question Form -->
+  <div id="customModal" class="modal-overlay hidden" role="dialog" aria-modal="true" aria-labelledby="modalTitle">
+    <div class="modal card">
+      <div class="modal-header">
+        <h3 id="modalTitle">✨ Add Question to Pool</h3>
+        <button id="closeModalBtn" class="close-btn" type="button" aria-label="Close dialog">&times;</button>
+      </div>
+      
+      <form id="addQuestionForm" novalidate>
+        <div class="form-group">
+          <label for="newQuestion">Question Prompt *</label>
+          <input type="text" id="newQuestion" placeholder="e.g., What is the virtual DOM in React?" required>
+        </div>
+
+        <div class="form-row">
+          <div class="form-group">
+            <label for="newCategory">Track *</label>
+            <select id="newCategory" required>
+              <option value="React & State">React & State</option>
+              <option value="JavaScript ES6+">JavaScript ES6+</option>
+              <option value="HTML & CSS">HTML & CSS</option>
+              <option value="Web APIs & Async">Web APIs & Async</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label for="newDifficulty">Difficulty *</label>
+            <select id="newDifficulty" required>
+              <option value="Easy">Easy</option>
+              <option value="Medium" selected>Medium</option>
+              <option value="Hard">Hard</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label>Options (Select the correct radio circle) *</label>
+          <div class="option-input-grid">
+            <div class="opt-field">
+              <input type="radio" name="correctOpt" value="0" checked title="Mark as correct">
+              <input type="text" id="opt0" placeholder="Option 1" required>
+            </div>
+            <div class="opt-field">
+              <input type="radio" name="correctOpt" value="1" title="Mark as correct">
+              <input type="text" id="opt1" placeholder="Option 2" required>
+            </div>
+            <div class="opt-field">
+              <input type="radio" name="correctOpt" value="2" title="Mark as correct">
+              <input type="text" id="opt2" placeholder="Option 3" required>
+            </div>
+            <div class="opt-field">
+              <input type="radio" name="correctOpt" value="3" title="Mark as correct">
+              <input type="text" id="opt3" placeholder="Option 4" required>
+            </div>
+          </div>
+        </div>
+
+        <div class="modal-footer">
+          <button type="button" id="cancelModalBtn" class="ghost-btn">Cancel</button>
+          <button type="submit" class="primary-btn">Save to Active Pool</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <script src="script.js"></script>
+</body>
+</html>
