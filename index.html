@@ -3,21 +3,21 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <meta name="description" content="QuizMaster Neo - Interactive 10-Question Web Tech Assessment Platform">
-  <title>QuizMaster Neo | 10-Question Tech Challenge</title>
+  <meta name="description" content="QuizMaster Neo - Student Evaluation & Assessment Platform">
+  <title>QuizMaster Neo | Evaluation-II Assessment Suite</title>
   <link rel="stylesheet" href="style.css">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800;900&family=JetBrains+Mono:wght@600;700&display=swap" rel="stylesheet">
 </head>
 <body>
-  <!-- Canvas Confetti Effect for High Scores -->
+  <!-- Canvas Confetti Effect -->
   <canvas id="confettiCanvas" class="confetti-canvas"></canvas>
 
-  <!-- Dynamic Toast Container -->
+  <!-- Toast Container -->
   <div id="toastContainer" class="toast-container" aria-live="polite"></div>
 
-  <!-- Background Animated Mesh Glows -->
+  <!-- Ambient Glow Backgrounds -->
   <div class="mesh-glow mesh-1"></div>
   <div class="mesh-glow mesh-2"></div>
   <div class="mesh-glow mesh-3"></div>
@@ -28,12 +28,12 @@
       <div class="logo">Q</div>
       <div>
         <h1>QuizMaster <span class="logo-accent">Neo</span></h1>
-        <p>Interactive 10-Question Assessment Suite</p>
+        <p>CSE Evaluation-II Assessment Platform</p>
       </div>
     </div>
 
     <nav class="nav-actions">
-      <button id="soundToggleBtn" class="icon-chip-btn" type="button" title="Toggle Sound FX">🔊</button>
+      <button id="soundToggleBtn" class="icon-chip-btn" type="button" title="Toggle Audio Feedback">🔊</button>
       <button id="openModalBtn" class="create-chip-btn" type="button">
         <span>✨ Add Question</span>
       </button>
@@ -42,88 +42,98 @@
   </header>
 
   <main class="container">
-    <!-- Screen 1: Start & Configuration Screen -->
+    <!-- Screen 1: Student Details & Setup -->
     <section id="startScreen" class="screen card active-screen">
-      <div class="pill-highlight">⚡ FULL 10-QUESTION ROUND GUARANTEED</div>
-      <div class="quiz-hero-icon">🚀</div>
-      <h2 class="hero-title">Test Your Web & Tech Powers</h2>
-      <p class="subtitle">Complete a fast-paced 10-question evaluation round. Filter your focus topic or play a random mix with live audio feedback!</p>
+      <div class="pill-highlight">🎓 OFFICIAL CANDIDATE EVALUATION SUITE</div>
+      <div class="quiz-hero-icon">📋</div>
+      <h2 class="hero-title">Candidate Assessment Test</h2>
+      <p class="subtitle">Please enter your candidate credentials below to start your timed 10-question evaluation session.</p>
 
-      <!-- Category & Difficulty Filters -->
-      <div class="controls-panel">
-        <div class="filter-box">
-          <label for="categoryFilter">Select Track:</label>
-          <div class="select-wrapper">
+      <!-- Student Input Form -->
+      <div class="student-form-card">
+        <div class="form-row">
+          <div class="form-group">
+            <label for="studentName">Student Full Name *</label>
+            <input type="text" id="studentName" placeholder="e.g., Yashvi Arora" required autocomplete="name">
+            <span class="field-error" id="nameError"></span>
+          </div>
+          <div class="form-group">
+            <label for="studentRoll">Roll Number / UID *</label>
+            <input type="text" id="studentRoll" placeholder="e.g., 2310990000" required autocomplete="off">
+            <span class="field-error" id="rollError"></span>
+          </div>
+        </div>
+
+        <div class="form-row">
+          <div class="form-group">
+            <label for="categoryFilter">Assessment Track</label>
             <select id="categoryFilter">
               <option value="All">🌈 All Tracks (Comprehensive 10Q Mix)</option>
               <option value="HTML & CSS">🎨 HTML & CSS Styling</option>
-              <option value="JavaScript ES6+">⚡ JavaScript ES6+ & Core</option>
+              <option value="JavaScript ES6+">⚡ JavaScript ES6+ Core</option>
               <option value="React & State">⚛️ React, Hooks & State</option>
               <option value="Web APIs & Async">🌐 Async JS & REST APIs</option>
             </select>
           </div>
-        </div>
-
-        <div class="filter-box">
-          <label for="difficultyFilter">Challenge Mode:</label>
-          <div class="select-wrapper">
+          <div class="form-group">
+            <label for="difficultyFilter">Challenge Mode</label>
             <select id="difficultyFilter">
               <option value="All">⚡ Adaptive Dynamic Mix</option>
               <option value="Easy">🌱 Beginner Essentials</option>
-              <option value="Medium">🔥 Intermediate Standard</option>
+              <option value="Medium" selected>🔥 Intermediate Standard</option>
               <option value="Hard">💀 Advanced Hardcore</option>
             </select>
           </div>
         </div>
       </div>
 
-      <!-- Feature Grid Cards -->
+      <!-- Quick Info Badges -->
       <div class="features-grid">
         <div class="feature-card neon-blue">
           <span class="feat-icon">🎯</span>
           <div>
-            <strong>Exact 10 Questions</strong>
-            <small>Clean scoring metrics</small>
+            <strong>10 Questions</strong>
+            <small>Standard round</small>
           </div>
         </div>
         <div class="feature-card neon-purple">
           <span class="feat-icon">⏱️</span>
           <div>
             <strong>15s per Question</strong>
-            <small>Live circular timer ring</small>
+            <small>Adaptive auto-timer</small>
           </div>
         </div>
         <div class="feature-card neon-pink">
-          <span class="feat-icon">🔊</span>
+          <span class="feat-icon">📊</span>
           <div>
-            <strong>Audio & Haptics</strong>
-            <small>Synthesized sound effects</small>
+            <strong>Verified Report</strong>
+            <small>Scorecard with print</small>
           </div>
         </div>
         <div class="feature-card neon-green">
-          <span class="feat-icon">📊</span>
+          <span class="feat-icon">🔍</span>
           <div>
-            <strong>Detailed Review</strong>
-            <small>Question breakdown at end</small>
+            <strong>Clean Review</strong>
+            <small>Uncluttered mistakes log</small>
           </div>
         </div>
       </div>
 
       <div class="action-row">
-        <button id="startBtn" class="primary-btn glow-btn" type="button">Start 10-Question Round →</button>
+        <button id="startBtn" class="primary-btn glow-btn" type="button">Begin Evaluation Round →</button>
         <button id="fetchApiBtn" class="api-btn" type="button">
           <span class="btn-spinner hidden" id="apiSpinner"></span>
-          <span>⚡ Import Live Web Dev Trivia</span>
+          <span>⚡ Import Online Trivia (API)</span>
         </button>
       </div>
     </section>
 
-    <!-- Screen 2: Active Quiz Screen -->
+    <!-- Screen 2: Active Timed Quiz -->
     <section id="quizScreen" class="screen card hidden">
       <div class="quiz-top">
         <div class="badge-cluster">
           <span id="questionCategoryBadge" class="cat-pill">Track</span>
-          <span id="difficultyBadge" class="diff-pill">Medium</span>
+          <span id="difficultyBadge" class="diff-pill">Standard</span>
           <span id="questionNumber" class="status-indicator">Question 1 of 10</span>
         </div>
 
@@ -137,13 +147,18 @@
         </div>
       </div>
 
-      <!-- Progress Track -->
-      <div class="progress-track" aria-label="Quiz progress">
+      <div class="progress-track" aria-label="Progress bar">
         <div id="progressBar" class="progress-bar"></div>
       </div>
 
+      <!-- Candidate Banner -->
+      <div class="candidate-bar">
+        <span>👤 Candidate: <strong id="activeCandidateName">-</strong></span>
+        <span>🆔 UID: <strong id="activeCandidateRoll">-</strong></span>
+      </div>
+
       <div class="question-area">
-        <h2 id="questionText">Loading question prompt...</h2>
+        <h2 id="questionText">Loading prompt...</h2>
         <div id="options" class="options"></div>
       </div>
 
@@ -155,12 +170,25 @@
       </div>
     </section>
 
-    <!-- Screen 3: Result Dashboard with Comprehensive Review -->
+    <!-- Screen 3: Structured Evaluation Scoreboard & Clean Review -->
     <section id="resultScreen" class="screen card hidden">
       <div class="result-icon-banner" id="resultIcon">🎉</div>
-      <p class="eyebrow">SESSION METRICS & REPORT</p>
-      <h2 id="resultHeading">Performance Assessment</h2>
+      <p class="eyebrow">FINAL EVALUATION REPORT</p>
+      <h2>Official Scorecard</h2>
 
+      <!-- Candidate Official Scorecard Profile Card -->
+      <div class="student-scorecard-profile">
+        <div class="profile-main">
+          <div class="avatar-badge">🎓</div>
+          <div class="profile-text">
+            <h3 id="scorecardName">Student Name</h3>
+            <p>Roll No / UID: <span id="scorecardRoll">N/A</span> • Date: <span id="scorecardDate">N/A</span></p>
+          </div>
+        </div>
+        <div class="profile-status" id="scorecardBadge">VERIFIED</div>
+      </div>
+
+      <!-- Score Ring & Percentage -->
       <div class="score-circle-container">
         <div class="score-circle">
           <strong id="score">0/10</strong>
@@ -170,7 +198,7 @@
 
       <p id="resultMessage" class="result-message"></p>
 
-      <!-- 4 Vibrant Stat Cards -->
+      <!-- 4 High-Contrast Stat Cards -->
       <div class="result-stats">
         <div class="stat-card stat-correct">
           <span>Correct Answers</span>
@@ -190,43 +218,51 @@
         </div>
       </div>
 
-      <!-- Interactive Question-by-Question Review Breakdown -->
-      <div class="review-section">
+      <!-- Clean & Clutter-Free Questions Breakdown -->
+      <div class="review-wrapper">
         <div class="review-header">
-          <h3>Question Review Breakdown (10 Questions)</h3>
-          <span class="review-hint">Green = Correct • Red = Incorrect</span>
+          <div>
+            <h3>Question-by-Question Analysis</h3>
+            <p class="review-subtitle">Review every answered question with highlighted choices</p>
+          </div>
+          <div class="review-legend">
+            <span class="legend-item"><span class="legend-dot pass"></span> Correct</span>
+            <span class="legend-item"><span class="legend-dot fail"></span> Mistake</span>
+          </div>
         </div>
-        <div id="reviewContainer" class="review-grid"></div>
+
+        <div id="cleanReviewList" class="clean-review-list"></div>
       </div>
 
-      <!-- Recent Attempt History -->
+      <!-- Stored Attempt History -->
       <div class="history-accordion">
-        <h3>Recent Evaluation Logs</h3>
+        <h3>Previous Candidate Attempts</h3>
         <ul id="historyList" class="history-list">
-          <li class="empty-state">No recorded attempts yet.</li>
+          <li class="empty-state">No recent records available.</li>
         </ul>
       </div>
 
       <div class="result-actions">
-        <button id="restartBtn" class="primary-btn glow-btn" type="button">↻ Play New 10-Question Round</button>
+        <button id="printBtn" class="secondary-btn" type="button">🖨️ Print / Save Scorecard</button>
+        <button id="restartBtn" class="primary-btn glow-btn" type="button">↻ Start New Attempt</button>
         <button id="homeBtn" class="secondary-btn" type="button">Dashboard Home</button>
-        <button id="clearDataBtn" class="ghost-danger-btn" type="button">Clear Saved Logs</button>
+        <button id="clearDataBtn" class="ghost-danger-btn" type="button">Clear Stored Logs</button>
       </div>
     </section>
   </main>
 
-  <!-- Interactive Modal: Add Custom Question Form -->
+  <!-- Interactive Modal: Add Question to Pool -->
   <div id="customModal" class="modal-overlay hidden" role="dialog" aria-modal="true" aria-labelledby="modalTitle">
     <div class="modal card">
       <div class="modal-header">
-        <h3 id="modalTitle">✨ Add Question to Pool</h3>
+        <h3 id="modalTitle">✨ Add Question to Active Pool</h3>
         <button id="closeModalBtn" class="close-btn" type="button" aria-label="Close dialog">&times;</button>
       </div>
       
       <form id="addQuestionForm" novalidate>
         <div class="form-group">
           <label for="newQuestion">Question Prompt *</label>
-          <input type="text" id="newQuestion" placeholder="e.g., What is the virtual DOM in React?" required>
+          <input type="text" id="newQuestion" placeholder="e.g., What is virtual DOM in React?" required>
         </div>
 
         <div class="form-row">
@@ -250,7 +286,7 @@
         </div>
 
         <div class="form-group">
-          <label>Options (Select the correct radio circle) *</label>
+          <label>Options (Select correct radio) *</label>
           <div class="option-input-grid">
             <div class="opt-field">
               <input type="radio" name="correctOpt" value="0" checked title="Mark as correct">
@@ -278,6 +314,10 @@
       </form>
     </div>
   </div>
+
+  <footer>
+    <p>QuizMaster Neo • Chitkara University FE-II Evaluation-II Architecture • Built with Modern CSS3, Audio Synth & ES6+ Vanilla JS</p>
+  </footer>
 
   <script src="script.js"></script>
 </body>

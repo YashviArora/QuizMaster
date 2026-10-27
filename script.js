@@ -1,5 +1,7 @@
 /**
- * QuizMaster Neo - Stable Evaluation-II Build
+ * QuizMaster Neo - Evaluation 2 Candidate Assessment System
+ * Covers: Student Credentials Capture, Verified Evaluation Scorecard,
+ * Structured Mistakes Breakdown, Sound Effects & LocalStorage Logs.
  */
 
 const MASTER_QUESTIONS = [
@@ -107,7 +109,7 @@ const MASTER_QUESTIONS = [
   {
     category: "React & State",
     difficulty: "Easy",
-    question: "In React, what are props used for?",
+    question: "In React, what are props primarily used for?",
     options: ["Passing data from parent to child", "Modifying global state directly", "Styling CSS", "Binding browser storage"],
     answer: "Passing data from parent to child"
   },
@@ -288,6 +290,11 @@ class QuizApp {
     this.activeRound = [];
     this.userAnswers = [];
 
+    this.candidate = {
+      name: "",
+      roll: ""
+    };
+
     this.currentIndex = 0;
     this.score = 0;
     this.timeLeft = 15;
@@ -303,13 +310,32 @@ class QuizApp {
 
   cacheDOM() {
     this.dom = {
+      // Screens
       startScreen: document.getElementById("startScreen"),
       quizScreen: document.getElementById("quizScreen"),
       resultScreen: document.getElementById("resultScreen"),
 
+      // Candidate Inputs
+      studentName: document.getElementById("studentName"),
+      studentRoll: document.getElementById("studentRoll"),
+      nameError: document.getElementById("nameError"),
+      rollError: document.getElementById("rollError"),
+
+      // Candidate live indicators
+      activeCandidateName: document.getElementById("activeCandidateName"),
+      activeCandidateRoll: document.getElementById("activeCandidateRoll"),
+
+      // Scorecard fields
+      scorecardName: document.getElementById("scorecardName"),
+      scorecardRoll: document.getElementById("scorecardRoll"),
+      scorecardDate: document.getElementById("scorecardDate"),
+      scorecardBadge: document.getElementById("scorecardBadge"),
+
+      // Filters
       categoryFilter: document.getElementById("categoryFilter"),
       difficultyFilter: document.getElementById("difficultyFilter"),
 
+      // Buttons
       startBtn: document.getElementById("startBtn"),
       fetchApiBtn: document.getElementById("fetchApiBtn"),
       apiSpinner: document.getElementById("apiSpinner"),
@@ -317,10 +343,12 @@ class QuizApp {
       quitBtn: document.getElementById("quitBtn"),
       restartBtn: document.getElementById("restartBtn"),
       homeBtn: document.getElementById("homeBtn"),
+      printBtn: document.getElementById("printBtn"),
       clearDataBtn: document.getElementById("clearDataBtn"),
       themeBtn: document.getElementById("themeBtn"),
       soundToggleBtn: document.getElementById("soundToggleBtn"),
 
+      // Quiz Elements
       questionCategoryBadge: document.getElementById("questionCategoryBadge"),
       difficultyBadge: document.getElementById("difficultyBadge"),
       questionNumber: document.getElementById("questionNumber"),
@@ -330,6 +358,7 @@ class QuizApp {
       timerText: document.getElementById("timerText"),
       progressBar: document.getElementById("progressBar"),
 
+      // Results Elements
       scoreText: document.getElementById("score"),
       percentageText: document.getElementById("percentage"),
       correctCount: document.getElementById("correctCount"),
@@ -338,9 +367,10 @@ class QuizApp {
       bestScore: document.getElementById("bestScore"),
       resultMessage: document.getElementById("resultMessage"),
       resultIcon: document.getElementById("resultIcon"),
-      reviewContainer: document.getElementById("reviewContainer"),
+      cleanReviewList: document.getElementById("cleanReviewList"),
       historyList: document.getElementById("historyList"),
 
+      // Modal
       customModal: document.getElementById("customModal"),
       openModalBtn: document.getElementById("openModalBtn"),
       closeModalBtn: document.getElementById("closeModalBtn"),
@@ -353,6 +383,7 @@ class QuizApp {
   init() {
     this.bindEvents();
     this.loadTheme();
+    this.loadSavedCandidateInfo();
     this.renderHistory();
   }
 
@@ -369,9 +400,16 @@ class QuizApp {
     return [...MASTER_QUESTIONS];
   }
 
+  loadSavedCandidateInfo() {
+    const savedName = localStorage.getItem("quizmaster_last_student_name");
+    const savedRoll = localStorage.getItem("quizmaster_last_student_roll");
+    if (savedName && this.dom.studentName) this.dom.studentName.value = savedName;
+    if (savedRoll && this.dom.studentRoll) this.dom.studentRoll.value = savedRoll;
+  }
+
   bindEvents() {
     if (this.dom.startBtn) {
-      this.dom.startBtn.addEventListener("click", () => this.startQuiz());
+      this.dom.startBtn.addEventListener("click", () => this.handleStartValidation());
     }
     if (this.dom.nextBtn) {
       this.dom.nextBtn.addEventListener("click", () => this.nextQuestion());
@@ -384,6 +422,9 @@ class QuizApp {
     }
     if (this.dom.homeBtn) {
       this.dom.homeBtn.addEventListener("click", () => this.returnToHome());
+    }
+    if (this.dom.printBtn) {
+      this.dom.printBtn.addEventListener("click", () => window.print());
     }
     if (this.dom.clearDataBtn) {
       this.dom.clearDataBtn.addEventListener("click", () => this.clearStorageData());
@@ -412,21 +453,48 @@ class QuizApp {
     }
   }
 
+  handleStartValidation() {
+    const nameVal = this.dom.studentName.value.trim();
+    const rollVal = this.dom.studentRoll.value.trim();
+
+    let isValid = true;
+    this.dom.nameError.textContent = "";
+    this.dom.rollError.textContent = "";
+
+    if (nameVal.length < 3) {
+      this.dom.nameError.textContent = "Please enter your valid full name (min 3 chars).";
+      isValid = false;
+    }
+
+    if (rollVal.length < 3) {
+      this.dom.rollError.textContent = "Please enter your Roll Number / UID.";
+      isValid = false;
+    }
+
+    if (!isValid) return;
+
+    this.candidate.name = nameVal;
+    this.candidate.roll = rollVal;
+
+    // Cache candidate details for ease of reuse
+    localStorage.setItem("quizmaster_last_student_name", nameVal);
+    localStorage.setItem("quizmaster_last_student_roll", rollVal);
+
+    this.startQuiz();
+  }
+
   prepareQuestions() {
     const cat = this.dom.categoryFilter ? this.dom.categoryFilter.value : "All";
     const diff = this.dom.difficultyFilter ? this.dom.difficultyFilter.value : "All";
 
-    // Matching questions
     let filtered = this.allQuestions.filter((q) => {
       const matchCat = (cat === "All") || (q.category === cat);
       const matchDiff = (diff === "All") || (q.difficulty.toLowerCase() === diff.toLowerCase());
       return matchCat && matchDiff;
     });
 
-    // Shuffle matched
     let round = [...filtered].sort(() => Math.random() - 0.5);
 
-    // Agar 10 se kam questions mile, to pool ke baaki questions se safe fill karein taaki crash na ho
     if (round.length < this.TARGET_COUNT) {
       const remaining = this.allQuestions
         .filter((q) => !round.some(existing => existing.question === q.question))
@@ -435,7 +503,6 @@ class QuizApp {
       round = [...round, ...remaining];
     }
 
-    // Limit to 10
     return round.slice(0, this.TARGET_COUNT);
   }
 
@@ -445,10 +512,9 @@ class QuizApp {
     this.currentIndex = 0;
     this.score = 0;
 
-    if (!this.activeRound || this.activeRound.length === 0) {
-      this.showToast("No questions available! Please reset filters.", "error");
-      return;
-    }
+    // Update Live Candidate details bar
+    this.dom.activeCandidateName.textContent = this.candidate.name || "Student";
+    this.dom.activeCandidateRoll.textContent = this.candidate.roll || "N/A";
 
     this.dom.startScreen.classList.add("hidden");
     this.dom.resultScreen.classList.add("hidden");
@@ -516,7 +582,7 @@ class QuizApp {
         this.recordUserAnswer(null);
         this.highlightCorrectAnswer();
         this.dom.nextBtn.disabled = false;
-        this.showToast("Time up!", "error");
+        this.showToast("Time expired for this question!", "error");
       }
     }, 1000);
   }
@@ -549,7 +615,9 @@ class QuizApp {
     const current = this.activeRound[this.currentIndex];
     this.userAnswers.push({
       question: current.question,
-      userChoice: userChoice || "Timeout / Skipped",
+      category: current.category,
+      difficulty: current.difficulty,
+      userChoice: userChoice || "Timed out / Skipped",
       correctAnswer: current.answer,
       isCorrect: userChoice === current.answer
     });
@@ -585,6 +653,24 @@ class QuizApp {
     const percentage = Math.round((this.score / total) * 100);
     const wrong = total - this.score;
 
+    // Candidate Scorecard Header
+    this.dom.scorecardName.textContent = this.candidate.name || "Student Candidate";
+    this.dom.scorecardRoll.textContent = this.candidate.roll || "N/A";
+    this.dom.scorecardDate.textContent = new Date().toLocaleDateString("en-IN", {
+      day: "numeric",
+      month: "short",
+      year: "numeric"
+    });
+
+    if (percentage >= 50) {
+      this.dom.scorecardBadge.textContent = "PASSED / PROFICIENT";
+      this.dom.scorecardBadge.className = "profile-status";
+    } else {
+      this.dom.scorecardBadge.textContent = "NEEDS REVISION";
+      this.dom.scorecardBadge.className = "profile-status fail";
+    }
+
+    // Analytics Metrics
     this.dom.scoreText.textContent = `${this.score}/${total}`;
     this.dom.percentageText.textContent = `${percentage}%`;
     this.dom.correctCount.textContent = this.score;
@@ -599,66 +685,78 @@ class QuizApp {
     if (percentage >= 70) {
       if (this.confetti) this.confetti.fire();
       this.dom.resultIcon.textContent = "🏆";
-      this.dom.resultMessage.textContent = "Outstanding Performance! High technical proficiency verified.";
+      this.dom.resultMessage.textContent = "Outstanding Performance! High conceptual mastery demonstrated.";
     } else if (percentage >= 50) {
-      this.dom.resultIcon.textContent = "🔥";
-      this.dom.resultMessage.textContent = "Good job! Keep practicing to master all concepts.";
+      this.dom.resultIcon.textContent = "👍";
+      this.dom.resultMessage.textContent = "Good effort! Solid fundamentals verified. Review mistakes below.";
     } else {
       this.dom.resultIcon.textContent = "💡";
-      this.dom.resultMessage.textContent = "Good effort! Check your detailed answers below.";
+      this.dom.resultMessage.textContent = "Needs improvement. Check the detailed question breakdown below.";
     }
 
+    // Save detailed candidate log
     this.saveHistory({
+      candidate: this.candidate.name,
+      roll: this.candidate.roll,
       score: this.score,
       total,
       percentage,
       time: new Date().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })
     });
 
-    this.renderReviewBreakdown();
+    this.renderCleanReview();
   }
 
-  renderReviewBreakdown() {
-    const container = this.dom.reviewContainer;
+  // Clean, Uncluttered Mistake & Question Breakdown
+  renderCleanReview() {
+    const container = this.dom.cleanReviewList;
     container.innerHTML = "";
 
     this.userAnswers.forEach((ans, idx) => {
-      const item = document.createElement("div");
-      item.className = `review-item ${ans.isCorrect ? "pass" : "fail"}`;
-      item.innerHTML = `
-        <div class="review-q-title">Q${idx + 1}: ${ans.question}</div>
-        <div class="review-answers">
-          <span class="user-tag ${ans.isCorrect ? "good" : "bad"}">
-            Your Choice: ${ans.userChoice}
+      const card = document.createElement("div");
+      card.className = `clean-review-card ${ans.isCorrect ? "correct-item" : "wrong-item"}`;
+
+      card.innerHTML = `
+        <div class="q-badge-row">
+          <span class="q-index">Question ${idx + 1} • ${ans.category}</span>
+          <span class="q-status-badge ${ans.isCorrect ? "pass" : "fail"}">
+            ${ans.isCorrect ? "✓ Correct (+1)" : "✕ Incorrect (0)"}
           </span>
-          ${
-            !ans.isCorrect
-              ? `<span class="correct-tag">Correct: ${ans.correctAnswer}</span>`
-              : ""
-          }
+        </div>
+        <h4>${ans.question}</h4>
+        <div class="comparison-grid">
+          <div class="pill-box user-choice ${ans.isCorrect ? "good" : "bad"}">
+            <span>Your Marked Answer</span>
+            <strong>${ans.userChoice}</strong>
+          </div>
+          <div class="pill-box correct-key">
+            <span>Verified Correct Answer</span>
+            <strong>${ans.correctAnswer}</strong>
+          </div>
         </div>
       `;
-      container.appendChild(item);
+
+      container.appendChild(card);
     });
   }
 
   saveHistory(item) {
     let logs = [];
     try {
-      logs = JSON.parse(localStorage.getItem("quizmaster_logs")) || [];
+      logs = JSON.parse(localStorage.getItem("quizmaster_candidate_logs")) || [];
     } catch (e) {
       logs = [];
     }
     logs.unshift(item);
     if (logs.length > 5) logs.pop();
-    localStorage.setItem("quizmaster_logs", JSON.stringify(logs));
+    localStorage.setItem("quizmaster_candidate_logs", JSON.stringify(logs));
     this.renderHistory();
   }
 
   renderHistory() {
     let logs = [];
     try {
-      logs = JSON.parse(localStorage.getItem("quizmaster_logs")) || [];
+      logs = JSON.parse(localStorage.getItem("quizmaster_candidate_logs")) || [];
     } catch (e) {
       logs = [];
     }
@@ -667,7 +765,7 @@ class QuizApp {
     list.innerHTML = "";
 
     if (logs.length === 0) {
-      list.innerHTML = `<li class="empty-state">No recent records available.</li>`;
+      list.innerHTML = `<li class="empty-state">No recorded candidate evaluations yet.</li>`;
       return;
     }
 
@@ -675,7 +773,7 @@ class QuizApp {
       const li = document.createElement("li");
       li.className = "history-item";
       li.innerHTML = `
-        <span>Attempt at <strong>${log.time}</strong></span>
+        <span><strong>${log.candidate}</strong> (${log.roll}) - <em>${log.time}</em></span>
         <span>Score: <strong>${log.score}/${log.total}</strong> (${log.percentage}%)</span>
       `;
       list.appendChild(li);
@@ -782,7 +880,7 @@ class QuizApp {
   toggleSound() {
     this.sfx.enabled = !this.sfx.enabled;
     this.dom.soundToggleBtn.textContent = this.sfx.enabled ? "🔊" : "🔇";
-    this.showToast(this.sfx.enabled ? "Sound Effects ON" : "Sound Effects MUTED", "info");
+    this.showToast(this.sfx.enabled ? "Audio Feedback ON" : "Audio Feedback MUTED", "info");
   }
 
   toggleTheme() {
@@ -812,14 +910,14 @@ class QuizApp {
   }
 
   clearStorageData() {
-    if (confirm("Reset high score records and attempt history?")) {
+    if (confirm("Reset all evaluation records and candidate logs?")) {
       localStorage.removeItem("quizmaster_custom_questions");
-      localStorage.removeItem("quizmaster_logs");
+      localStorage.removeItem("quizmaster_candidate_logs");
       localStorage.removeItem("quizmaster_best_score");
       this.allQuestions = [...MASTER_QUESTIONS];
       this.returnToHome();
       this.renderHistory();
-      this.showToast("All stored data cleared successfully.", "info");
+      this.showToast("All stored records cleared.", "info");
     }
   }
 }
